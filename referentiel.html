@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Référentiel de contrôles agentiques</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout : même affiche que le reste du site, aplat jaune pour le référentiel.
+   Un profil de cas d'usage en haut, la carte des 16 domaines, puis le catalogue filtré. */
+:root{
+  --bg:#f4f4f0; --surface:#ffffff; --ink:#0f1012; --muted:#5b5e66; --line:rgba(15,16,18,.14);
+  --yl:#ffd23f; --on-yl:#0f1012; --mk:#0f1012; --soft:rgba(15,16,18,.07);
+  --fw-t:#2a2ee6; --ca-t:#06764b; --cb-t:#c7330e;
+  --display:"Bricolage Grotesque","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --body:"Instrument Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1012; --surface:#1a1c20; --ink:#f2f2ee; --muted:#a1a4ab; --line:rgba(242,242,238,.17);
+  --mk:#ffd23f; --soft:rgba(242,242,238,.08); --fw-t:#9092ff; --ca-t:#38d193; --cb-t:#ff7b56; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1012; --surface:#1a1c20; --ink:#f2f2ee; --muted:#a1a4ab; --line:rgba(242,242,238,.17);
+  --mk:#ffd23f; --soft:rgba(242,242,238,.08); --fw-t:#9092ff; --ca-t:#38d193; --cb-t:#ff7b56; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{width:min(1160px,100% - 40px);margin-inline:auto}
+h1,h2,h3,h4,p,ul,dl,dd,fieldset{margin:0}
+ul{padding:0;list-style:none}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--mk);outline-offset:3px}
+h1{font:800 clamp(40px,8.6vw,120px)/.92 var(--display);letter-spacing:-.035em;text-wrap:balance}
+h2{font:800 clamp(34px,5.2vw,66px)/.96 var(--display);letter-spacing:-.03em;text-wrap:balance}
+h3{font:700 clamp(24px,2.8vw,34px)/1.05 var(--display);letter-spacing:-.02em}
+.k{font:500 12.5px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.lead{font-size:clamp(18px,1.9vw,21px);max-width:60ch;color:var(--muted)}
+section{padding-block:clamp(48px,7vw,96px)}
+.sh{display:grid;gap:14px;margin-bottom:clamp(24px,3.5vw,44px)}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:6px 16px;flex-wrap:wrap;padding-block:9px}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav a{display:flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none}
+.nav a i{width:11px;height:11px;border-radius:50%;background:var(--d)}
+.nav a[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.portail{font-weight:600;font-size:15px;color:#007AFF;text-decoration:none;white-space:nowrap}
+
+.hero{background:var(--yl);color:var(--on-yl);padding-block:clamp(40px,6vw,84px) clamp(36px,5vw,68px)}
+.hero .wrap{display:grid;gap:clamp(16px,2.4vw,26px)}
+.hero .sub{font-size:clamp(19px,2.1vw,24px);line-height:1.35;max-width:50ch}
+.hfacts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 24px;margin-top:clamp(8px,2vw,24px)}
+.hfacts div{border-top:3px solid var(--on-yl);padding-top:10px}
+.hfacts b{display:block;font:800 clamp(34px,4.6vw,60px)/.9 var(--display);letter-spacing:-.04em}
+.hfacts span{font-size:15px}
+
+/* profil */
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.presets button,.btn{border:2px solid var(--ink);background:none;border-radius:999px;padding:7px 15px;font-weight:600;font-size:15px;cursor:pointer}
+.btn.fill{background:var(--yl);color:var(--on-yl);border-color:var(--yl)}
+.name{display:grid;gap:6px;margin-block:22px 6px;max-width:520px}
+.name input{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:17px;width:100%}
+.dims{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 44px}
+.dim{border:0;padding:16px 0;border-top:1px solid var(--line);min-width:0;display:grid;gap:8px}
+.dim legend{font:700 21px var(--display);padding:0;float:left;width:100%;margin-bottom:8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;clear:both}
+.seg label{cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);font-weight:500;font-size:15px}
+.seg input:checked+span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg input:focus-visible+span{outline:3px solid var(--mk);outline-offset:2px}
+.hint{font-size:14.5px;color:var(--muted);min-height:1.5em}
+.togs{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0 44px;border-top:1px solid var(--line);margin-top:0}
+.tog{display:flex;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line);cursor:pointer;font-weight:500}
+.tog input{width:21px;height:21px;flex:none;accent-color:var(--mk)}
+
+/* résultat */
+.verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px 44px;align-items:center;background:var(--surface);border-radius:20px;padding:clamp(20px,3vw,34px);margin-top:clamp(28px,4vw,44px)}
+.verdict .big{font:800 clamp(88px,12vw,160px)/.78 var(--display);letter-spacing:-.06em}
+.verdict .why{color:var(--muted);margin-top:6px;max-width:64ch}
+.counts{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:16px}
+.counts div b{font:800 34px/1 var(--display);letter-spacing:-.03em;display:block}
+.counts div span{font-size:14.5px;color:var(--muted)}
+.pill{display:inline-block;font:600 12px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:6px 9px;border-radius:999px;white-space:nowrap}
+.pill.o{background:var(--yl);color:var(--on-yl)}
+.pill.r{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.pill.n{color:var(--muted);box-shadow:inset 0 0 0 1.5px var(--line)}
+
+/* carte des domaines */
+.doms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.dom{text-align:left;border:0;background:var(--surface);border-radius:16px;padding:16px;cursor:pointer;display:grid;gap:8px;align-content:start;min-width:0}
+.dom .c{font:800 30px/1 var(--display);letter-spacing:-.03em}
+.dom .n{font-weight:600;font-size:15.5px;line-height:1.25}
+.dom .num{font:500 12.5px var(--mono);color:var(--muted)}
+.dom[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.dom[aria-pressed="true"] .num{color:inherit;opacity:.75}
+.meter{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--soft)}
+.meter i{display:block;height:100%}
+.meter .o{background:var(--yl)} .meter .r{background:var(--muted)}
+.dom.zero{opacity:.55}
+.alt{background:var(--surface)} .alt .dom:not([aria-pressed="true"]){background:var(--bg)}
+
+/* filtres */
+.tools{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:22px}
+.tools input[type=search],.tools select{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:15px;min-width:0}
+.tools input[type=search]{flex:1 1 220px}
+.tools .seg span{border-color:var(--line)}
+.grow{flex:1 1 0}
+.fallback{width:100%;min-height:120px;margin-top:10px;font:13px var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px}
+.toast{font-weight:600;font-size:15px}
+
+/* catalogue */
+.grp{margin-top:clamp(30px,4vw,52px)}
+.grp>header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 22px;align-items:end;border-bottom:3px solid var(--ink);padding-bottom:12px}
+.grp .gc{font:800 clamp(44px,6vw,76px)/.8 var(--display);letter-spacing:-.05em}
+.grp .go{color:var(--muted);font-size:16px}
+.grp .gn{font:500 13px var(--mono);color:var(--muted);white-space:nowrap}
+.ctl{border-bottom:1px solid var(--line)}
+.ctl summary{display:grid;grid-template-columns:86px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 4px;cursor:pointer;list-style:none}
+.ctl summary::-webkit-details-marker{display:none}
+.ctl .id{font:600 13.5px var(--mono)}
+.ctl .t{font-weight:600;font-size:18px;line-height:1.25}
+.ctl.na summary .t,.ctl.na summary .id{color:var(--muted)}
+.ctl .body{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px 44px;padding:4px 4px 24px 104px}
+.ctl .st{grid-column:1 / -1;font-size:19px;line-height:1.4;max-width:70ch}
+.ctl h4{font:500 12px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.ctl .how{display:grid;gap:7px}
+.ctl .how li{position:relative;padding-left:26px}
+.ctl .how li::before{content:"";position:absolute;left:0;top:.25em;width:14px;height:14px;border:2px solid var(--ink);border-radius:4px}
+.ctl .side{display:grid;gap:16px;align-content:start}
+.ctl .because{font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font:500 12.5px var(--mono);padding:4px 8px;border-radius:6px;background:var(--soft)}
+.empty{padding:40px 0;color:var(--muted);font-size:19px}
+footer{border-top:1px solid var(--line);padding-block:26px 44px;font-size:14px;color:var(--muted)}
+
+@media (max-width:860px){
+  .dims,.verdict{grid-template-columns:minmax(0,1fr)}
+  .doms{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hfacts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ctl .body{grid-template-columns:minmax(0,1fr);padding-left:4px}
+  .ctl summary{grid-template-columns:minmax(0,1fr) auto}
+  .ctl summary .id{grid-column:1 / -1;margin-bottom:-10px}
+  .grp>header{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap">
+  <nav class="nav" aria-label="Pages">
+    <a href="index.html#framework"><i style="--d:var(--fw-t)"></i>Framework</a>
+    <a href="index.html#cas-a"><i style="--d:var(--ca-t)"></i>Ligne A</a>
+    <a href="index.html#cas-b"><i style="--d:var(--cb-t)"></i>Ligne B</a>
+    <a href="referentiel.html" aria-current="page"><i style="--d:var(--yl)"></i>Référentiel</a>
+  </nav>
+  <a class="portail" href="http://192.168.1.38">⊞ Portail</a>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="k">Référentiel de contrôles · agents IA en banque · version 0.1 · 12.10.2026</p>
+  <h1>Les contrôles, un par un.</h1>
+  <p class="sub">Décris ton cas d'usage. Le référentiel calcule le palier et trie les contrôles : obligatoires, recommandés, ou sans objet. Tu repars avec une déclaration d'applicabilité.</p>
+  <div class="hfacts">
+    <div><b id="h-n"></b><span>contrôles</span></div>
+    <div><b id="h-d"></b><span>domaines</span></div>
+    <div><b>15</b><span>critères de profil</span></div>
+    <div><b>6</b><span>référentiels en correspondance</span></div>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <div class="sh"><p class="k">Étape 1</p><h2>Le profil du cas d'usage</h2><p class="lead">Quinze critères suffisent à décider de l'applicabilité. Pars d'un exemple, puis ajuste.</p></div>
+  <div class="presets" id="presets"><span class="k">Exemples</span></div>
+  <label class="name"><span class="k">Nom du cas d'usage</span><input type="text" id="uc-name" autocomplete="off"></label>
+  <div class="dims" id="dims"></div>
+  <div class="togs" id="togs"></div>
+
+  <div class="verdict" aria-live="polite">
+    <div class="big" id="v-tier"></div>
+    <div><h3 id="v-title"></h3><p class="why" id="v-why"></p>
+      <div class="counts" id="v-counts"></div></div>
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <div class="sh"><p class="k">Étape 2</p><h2>La carte des seize domaines</h2><p class="lead">Chaque barre montre la part de contrôles obligatoires (en jaune) et recommandés (en gris) pour ton profil. Un clic filtre le catalogue.</p></div>
+  <div class="doms" id="doms"></div>
+</div></section>
+
+<section id="catalogue"><div class="wrap">
+  <div class="sh"><p class="k">Étape 3</p><h2>Le catalogue</h2><p class="lead">Ouvre un contrôle pour voir quoi mettre en place, la preuve à fournir, et pourquoi il s'applique ou non à ton cas.</p></div>
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Statut">
+      <label><input type="radio" name="f-st" id="f-st-app" value="app" checked><span>Applicables</span></label>
+      <label><input type="radio" name="f-st" id="f-st-o" value="o"><span>Obligatoires</span></label>
+      <label><input type="radio" name="f-st" id="f-st-all" value="all"><span>Tous</span></label>
+      <label><input type="radio" name="f-st" id="f-st-n" value="n"><span>Sans objet</span></label>
+    </div>
+    <select id="f-layer" aria-label="Où vit le contrôle"><option value="">Tous les outils</option></select>
+    <input type="search" id="f-q" placeholder="Chercher : injection, FINMA, ASI03…" aria-label="Chercher">
+  </div>
+  <div class="tools">
+    <button type="button" class="btn fill" id="copy">Copier pour Excel</button>
+    <button type="button" class="btn" id="dl" hidden>Télécharger le CSV</button>
+    <button type="button" class="btn" id="reset-dom" hidden>Tous les domaines</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+  </div>
+  <textarea class="fallback" id="fallback" hidden aria-label="Déclaration d'applicabilité à copier"></textarea>
+  <div id="list"></div>
+</div></section>
+
+<footer><div class="wrap">Correspondances indicatives avec la communication FINMA 08/2024, les circulaires FINMA 2023/1 et 2018/3, la LPD, ISO/IEC 27002:2022, ISO/IEC 42001, le NIST AI RMF et l'OWASP Top 10 for Agentic Applications. Support de travail, pas un avis juridique : à valider avec le juridique et la compliance de chaque établissement.</div></footer>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+/* ---------- profil ---------- */
+const DIMS=[
+ ["auto","Architecture",["Assistant","Workflow","Agent","Multi-agents"],["Le modèle répond, sans outil.","Les étapes et les outils sont fixés par le code.","Le modèle choisit lui-même ses outils et ses étapes.","Plusieurs agents coopèrent et s'échangent des messages."]],
+ ["inp","Entrées",["Internes maîtrisées","Contenus reçus","Web ouvert"],["Données produites et contrôlées par la banque.","Courriels, documents de tiers, texte libre : non fiables.","Pages web : n'importe qui peut y écrire."]],
+ ["net","Réseau sortant",["Aucun","Liste d'hôtes","Ouvert"],["L'agent ne joint rien hors de sa machine.","Sorties limitées à des hôtes désignés.","L'agent peut joindre n'importe quel hôte."]],
+ ["data","Données",["Internes","Personnelles","Identification client"],["Pas de données personnelles.","Données de collaborateurs ou de tiers.","Noms, comptes, tout ce qui identifie un client."]],
+ ["model","Modèle",["Local","Chez un fournisseur"],["Exécuté dans le périmètre de la banque.","Appelé par API chez un tiers."]],
+ ["act","Actions",["Lecture seule","Écrit en interne","Agit vers l'extérieur"],["Il lit et répond.","Il écrit dans un système de la banque.","Envoi, paiement, action irréversible."]],
+ ["user","Interlocuteur",["Collaborateur","Client"],["Usage interne.","L'agent parle directement à un client."]],
+ ["hum","Validation humaine",["Chaque action","Par exception","Aucune"],["Un humain valide avant tout effet.","Un humain n'intervient que sur alerte ou par échantillon.","L'agent agit seul."]]
+];
+const TOGS=[["crit","Touche une fonction critique"],["dec","Décide à propos d'une personne"],["mem","Garde une mémoire entre sessions"],["rag","Consulte une base documentaire"],["code","Exécute du code qu'il produit"],["tp","Utilise des outils ou services tiers (MCP, API)"],["eu","Sorties utilisées dans l'UE"]];
+const PRESETS=[
+ ["Classifieur d'incidents (ligne A)",{auto:1,inp:1,net:0,data:2,model:0,act:1,user:0,hum:0}],
+ ["Veille médias négatifs (ligne B)",{auto:3,inp:2,net:1,data:2,model:0,act:1,user:0,hum:0,tp:1}],
+ ["Assistant documentaire interne",{auto:0,inp:0,net:0,data:0,model:0,act:0,user:0,hum:0,rag:1}],
+ ["Agent autonome face au client",{auto:2,inp:1,net:1,data:2,model:1,act:2,user:1,hum:1,mem:1,rag:1,tp:1}]
+];
+let P={},NAME="";
+$("#dims").innerHTML=DIMS.map(([k,l,o])=>`<fieldset class="dim"><legend>${l}</legend><div class="seg">${o.map((x,i)=>`<label><input type="radio" name="d-${k}" id="d-${k}-${i}" value="${i}"><span>${x}</span></label>`).join("")}</div><p class="hint" id="h-${k}"></p></fieldset>`).join("");
+$("#togs").innerHTML=TOGS.map(([k,l])=>`<label class="tog"><input type="checkbox" id="t-${k}">${l}</label>`).join("");
+$("#presets").insertAdjacentHTML("beforeend",PRESETS.map((p,i)=>`<button type="button" data-pre="${i}">${p[0]}</button>`).join(""));
+function setProfile(p,name){
+  DIMS.forEach(([k])=>{P[k]=p[k]||0;$(`#d-${k}-${P[k]}`).checked=true});
+  TOGS.forEach(([k])=>{P[k]=p[k]?1:0;$("#t-"+k).checked=!!p[k]});
+  if(name!==undefined){NAME=name;$("#uc-name").value=name}
+  update();
+}
+$("#dims").addEventListener("change",e=>{const m=e.target.name.match(/^d-(.+)$/);if(m){P[m[1]]=+e.target.value;update()}});
+$("#togs").addEventListener("change",e=>{P[e.target.id.slice(2)]=e.target.checked?1:0;update()});
+$("#presets").addEventListener("click",e=>{const b=e.target.closest("[data-pre]");if(b){const p=PRESETS[+b.dataset.pre];setProfile(p[1],p[0])}});
+$("#uc-name").addEventListener("input",e=>{NAME=e.target.value;save()});
+
+/* drapeaux dérivés du profil */
+const FL={tools:["utilise des outils","aucun outil"],agent:["le modèle choisit ses actions","le modèle ne choisit pas ses actions"],multi:["plusieurs agents","un seul agent"],
+ untr:["lit des contenus non fiables","entrées maîtrisées"],web:["lit le web","ne lit pas le web"],netout:["sort vers le réseau","aucune sortie réseau"],netopen:["réseau ouvert","réseau non ouvert"],
+ pii:["traite des données personnelles","pas de données personnelles"],cid:["traite des données d'identification client","pas de données d'identification client"],ext:["modèle chez un fournisseur","modèle local"],
+ write:["écrit dans un système","lecture seule"],extact:["agit vers l'extérieur","pas d'action externe"],client:["parle à un client","pas de contact client"],nohum:["agit sans validation humaine","validation humaine en place"],
+ crit:["fonction critique","fonction non critique"],dec:["décide à propos d'une personne","pas de décision sur une personne"],mem:["mémoire persistante","pas de mémoire persistante"],rag:["base documentaire","pas de base documentaire"],
+ code:["exécute du code","n'exécute pas de code"],tp:["outils ou services tiers","pas d'outil tiers"],eu:["usage dans l'UE","pas d'usage dans l'UE"]};
+function flags(p){return {tools:p.auto>=1,agent:p.auto>=2,multi:p.auto===3,untr:p.inp>=1,web:p.inp===2,netout:p.net>=1,netopen:p.net===2,pii:p.data>=1,cid:p.data===2,ext:p.model===1,
+  write:p.act>=1,extact:p.act===2,client:p.user===1,nohum:p.hum===2,crit:!!p.crit,dec:!!p.dec,mem:!!p.mem,rag:!!p.rag,code:!!p.code,tp:!!p.tp,eu:!!p.eu}}
+function tier(f){
+  const t3=[];if(f.client)t3.push("il parle à un client");if(f.extact)t3.push("il agit vers l'extérieur");if(f.netout)t3.push("il sort vers le réseau");if(f.crit)t3.push("il touche une fonction critique");if(f.dec)t3.push("il décide à propos d'une personne");if(f.agent&&f.nohum&&f.write)t3.push("il écrit de lui-même, sans validation humaine");
+  if(t3.length)return [3,t3];
+  const t2=[];if(f.write)t2.push("il écrit dans un système interne");if(f.pii)t2.push("il traite des données personnelles");if(f.ext)t2.push("son modèle tourne chez un fournisseur");
+  return t2.length?[2,t2]:[1,[]];
+}
+const ok=(c,f)=>!c||c.split("|").some(g=>g.split("+").every(k=>f[k]));
+function because(c,f,app){
+  if(!c)return "S'applique à tout cas d'usage.";
+  const gs=c.split("|").map(g=>g.split("+"));
+  if(app){const g=gs.find(g=>g.every(k=>f[k]));return "S'applique parce que : "+g.map(k=>FL[k][0]).join(", ")+"."}
+  const g=gs.map(g=>g.filter(k=>!f[k])).sort((a,b)=>a.length-b.length)[0];
+  return "Sans objet ici : "+g.map(k=>FL[k][1]).join(", ")+"."}
+
+/* ---------- référentiel ---------- */
+const DOM=[["GOV","Gouvernance","Chaque agent a un propriétaire, une place à l'inventaire et un palier."],["RSK","Risques et menaces","On sait comment l'agent peut échouer ou être détourné avant de le construire."],["IAM","Identité et privilèges","L'agent agit sous sa propre identité, avec le minimum de droits."],["ACT","Périmètre d'action","Ce que l'agent peut faire est borné par du code, pas par une consigne."],["HUM","Supervision humaine","Un humain garde la main là où l'enjeu l'exige, et il est en mesure de juger."],["DAT","Données","Les données client et personnelles restent maîtrisées, du prompt aux journaux."],["CNT","Contenu","Ce qui entre est traité comme une donnée, ce qui sort est vérifié."],["CNF","Confinement","Fichiers, processus et réseau sont fermés par défaut."],["SUP","Tiers et composants","Modèles, outils et fournisseurs sont connus, figés et sous contrat."],["MEM","Mémoire et documents","Ce que l'agent retient ou consulte est cloisonné et intègre."],["MAG","Multi-agents","Les agents ne se font pas confiance par défaut."],["LOG","Traçabilité","Toute décision peut être reconstituée et expliquée."],["TST","Tests et assurance","Les contrôles sont prouvés, avec des seuils fixés d'avance."],["OPS","Exploitation","La dérive se voit, et rien ne change sans être retesté."],["INC","Incidents et continuité","On sait couper, annoncer, réparer et continuer sans l'agent."],["TRA","Transparence","Les personnes savent à quoi elles ont affaire et gardent un recours."]];
+const LAYER={PR:"Processus",LG:"LangGraph",NG:"NeMo Guardrails",OS:"OpenShell",DV:"Code à écrire",IN:"Infrastructure"};
+const TYPE={P:"Préventif",D:"Détectif",C:"Correctif"};
+/* [id, titre, énoncé, [mise en œuvre], preuve, condition, palier d'obligation, où, type, correspondances] */
+const C=[
+["GOV-01","Politique d'usage des agents","La banque dispose d'une politique approuvée qui fixe les usages d'agents autorisés, interdits et soumis à accord.",["Faire approuver la politique par la direction","La revoir au moins une fois par an"],"Politique datée et approuvée","",1,"PR","P","FINMA 08/2024;ISO 27002 5.1;ISO 42001 A.2;NIST AI RMF Govern"],
+["GOV-02","Propriétaire désigné","Chaque agent a un propriétaire métier nommé, responsable de son usage et de ses résultats.",["Inscrire le propriétaire et son suppléant sur la fiche d'agent","Faire signer la fiche"],"Fiche d'agent signée","",1,"PR","P","FINMA 08/2024;ISO 27002 5.2;ISO 42001 A.3"],
+["GOV-03","Inventaire central","Tous les agents, y compris en test, figurent dans un inventaire central tenu à jour.",["Enregistrer modèle, outils, données, sorties réseau et palier","Rapprocher l'inventaire des déploiements réels chaque trimestre"],"Extrait d'inventaire et dernier rapprochement","",1,"PR","P","FINMA 08/2024;Circ. 2023/1;ISO 27002 5.9"],
+["GOV-04","Classification par palier","Chaque agent reçoit un palier de risque selon des règles écrites, avant tout développement.",["Appliquer les règles de palier et la règle des deux","Faire confirmer le palier par la deuxième ligne dès T2"],"Fiche portant le palier et sa justification","",1,"PR","P","FINMA 08/2024;ISO 42001 A.5;NIST AI RMF Map"],
+["GOV-05","Séparation des rôles","Construire, contrôler et auditer un agent sont trois rôles tenus par des personnes différentes.",["Décrire qui construit, qui revoit et qui audite","Interdire qu'une équipe valide son propre agent"],"Matrice des rôles","",2,"PR","P","FINMA 08/2024;Circ. 2023/1;ISO 27002 5.3"],
+["GOV-06","Compétences","Les personnes qui construisent, valident ou utilisent un agent sont formées à ses limites.",["Former les valideurs au biais d'automatisation","Former les équipes aux attaques par injection"],"Registre de formation","",1,"PR","P","FINMA 08/2024;ISO 27002 6.3;ISO 42001 A.4"],
+["GOV-07","Revue du cadre","Le cadre de gouvernance est revu à échéance fixe et à chaque évolution des textes.",["Tenir une revue semestrielle","Suivre FINMA, PFPDT, projet de loi IA suisse et AI Act"],"Compte rendu de revue","",1,"PR","P","ISO 27002 5.31;ISO 42001 A.2"],
+["GOV-08","Qualification au regard du droit de l'UE","L'applicabilité de l'AI Act et de DORA au cas d'usage est qualifiée et documentée.",["Déterminer le rôle (fournisseur ou déployeur) et le niveau de risque","Vérifier si le cas relève de l'annexe III"],"Note de qualification","eu",1,"PR","P","AI Act;DORA"],
+
+["RSK-01","Fiche d'agent","Une fiche décrit la finalité, le modèle, les outils, les données, les sorties réseau et les décisions de l'agent.",["Remplir la fiche avant tout développement","La mettre à jour à chaque changement"],"Fiche versionnée","",1,"PR","P","FINMA 08/2024;ISO 42001 A.6"],
+["RSK-02","Schéma des flux","Un schéma montre qui parle à quoi, et où passent les frontières de confiance.",["Tracer chaque source d'entrée et chaque sortie","Marquer les zones sans réseau et sans données client"],"Schéma daté","",1,"PR","P","CSA MAESTRO;ISO 27002 8.27"],
+["RSK-03","Modèle de menaces","Les menaces propres aux agents sont passées en revue une à une, chacune avec un scénario concret.",["Parcourir OWASP ASI01 à ASI10","Écrire un scénario pour chaque menace retenue"],"Registre de menaces","",2,"PR","P","OWASP ASI01-10;MITRE ATLAS;NIST AI RMF Map"],
+["RSK-04","Un contrôle en face de chaque menace","Chaque menace retenue est couverte par un contrôle ou par une acceptation de risque signée.",["Lier chaque ligne du registre à un contrôle de ce référentiel","Faire signer les acceptations par le propriétaire"],"Registre avec contrôle et acceptations","",2,"PR","P","FINMA 08/2024;ISO 42001 A.5;NIST AI RMF Manage"],
+["RSK-05","Analyse d'impact sur la protection des données","Une analyse d'impact est menée quand le traitement présente un risque élevé pour les personnes.",["Évaluer le besoin dès qu'il y a données sensibles ou profilage","Associer le conseiller à la protection des données"],"Analyse d'impact, ou note justifiant son absence","pii",2,"PR","P","LPD art. 22;ISO 27002 5.34;ISO 42001 A.5"],
+["RSK-06","Règle des deux","Aucun composant ne cumule entrées non fiables, données sensibles et action externe sans validation humaine.",["Vérifier la règle sur le schéma des flux","Séparer les rôles quand les trois facteurs sont réunis"],"Schéma annoté","untr",1,"PR","P","OWASP ASI01;Meta Rule of Two"],
+
+["IAM-01","Identité propre à l'agent","Chaque agent agit sous une identité technique qui lui est propre, rattachée à son propriétaire.",["Créer un compte de service par agent","Interdire le partage d'identité entre agents"],"Liste des comptes de service","tools",1,"DV","P","OWASP ASI03;ISO 27002 5.16;IMDA MGF"],
+["IAM-02","Moindre privilège","L'agent ne reçoit que les droits nécessaires à sa tâche, sur les seules données utiles.",["Partir de zéro droit et ajouter au besoin","Revoir les droits chaque semestre"],"Matrice des droits et dernière revue","tools",1,"DV","P","OWASP ASI03;Circ. 2023/1;ISO 27002 5.15;ISO 27002 5.18"],
+["IAM-03","Secrets hors de portée du modèle","Les clés et les jetons ne sont jamais visibles par le modèle ni présents dans son contexte.",["Injecter les secrets au moment de l'appel, hors du prompt","Utiliser la substitution d'identifiants du bac à sable"],"Configuration et test de fuite","tools",1,"OS","P","OWASP ASI03;ISO 27002 5.17"],
+["IAM-04","Identifiants de courte durée","Les identifiants de l'agent expirent vite et sont limités à une tâche.",["Émettre des jetons à durée courte","Les révoquer à la fin de l'exécution"],"Paramètres d'émission des jetons","agent",2,"DV","P","OWASP ASI03;ISO 27002 5.17"],
+["IAM-05","Délégation tracée","Quand l'agent agit pour un utilisateur, il n'a jamais plus de droits que lui, et le lien est tracé.",["Propager l'identité de l'utilisateur jusqu'à l'outil","Refuser l'action si l'utilisateur n'y a pas droit"],"Trace montrant l'utilisateur et l'agent","tools",2,"DV","P","OWASP ASI03;ISO 27002 5.15"],
+["IAM-06","Accès à la configuration","La modification des prompts, des politiques et des outils de l'agent est restreinte et tracée.",["Limiter les droits d'écriture sur le dépôt de politiques","Exiger une revue pour chaque modification"],"Droits du dépôt et historique","",1,"PR","P","Circ. 2023/1;ISO 27002 8.2"],
+
+["ACT-01","Liste blanche d'outils","L'agent ne peut appeler que les outils explicitement autorisés pour son cas d'usage.",["Déclarer les outils dans la configuration, pas dans le prompt","Refuser tout outil non listé"],"Configuration des outils","tools",1,"LG","P","OWASP ASI02;ISO 27002 8.19"],
+["ACT-02","Paramètres bornés","Les paramètres de chaque appel d'outil sont validés par du code avant exécution.",["Typer et borner chaque paramètre","Rejeter les valeurs hors périmètre : montant, destinataire, chemin"],"Schémas de validation et tests","tools",1,"DV","P","OWASP ASI02;ISO 27002 8.26"],
+["ACT-03","Plafonds d'appels","Le nombre d'appels au modèle et aux outils est plafonné pour chaque exécution.",["Fixer un plafond par exécution et par jour","Arrêter l'agent et alerter quand il est atteint"],"Configuration des plafonds","tools",1,"LG","P","OWASP ASI08;ISO 27002 8.6"],
+["ACT-04","Conditions d'arrêt","L'agent s'arrête de lui-même sur des conditions définies, et rend la main.",["Définir durée maximale, nombre d'étapes et erreurs répétées","Tester chaque condition"],"Tests des conditions d'arrêt","agent",1,"LG","P","OWASP ASI08;OWASP ASI10"],
+["ACT-05","Sortie structurée","Quand la tâche le permet, la sortie de l'agent est contrainte à un format fermé.",["Imposer un schéma : liste de valeurs, champs typés","Rejeter toute sortie hors schéma"],"Schéma et tests de rejet","",1,"LG","P","OWASP ASI01;ISO 27002 8.26"],
+["ACT-06","Écriture limitée et réversible","Les écritures de l'agent sont limitées à des emplacements définis et peuvent être annulées.",["Écrire des propositions plutôt que des valeurs finales","Conserver l'état précédent"],"Démonstration d'annulation","write",1,"DV","P","OWASP ASI02;ISO 27002 8.13"],
+["ACT-07","Exécution de code isolée","Tout code produit par l'agent s'exécute dans un bac à sable sans accès au reste du système.",["Exécuter dans un environnement jetable","Y interdire le réseau et les secrets"],"Configuration du bac à sable et test d'évasion","code",1,"OS","P","OWASP ASI05;ISO 27002 8.31"],
+["ACT-08","Actions à fort impact listées","Les actions irréversibles ou à fort impact sont identifiées et soumises à un régime renforcé.",["Tenir la liste : paiement, envoi externe, suppression","Relier chaque action à une validation humaine"],"Liste approuvée par le propriétaire","write",2,"PR","P","IMDA MGF;FSB Sound Practices"],
+
+["HUM-01","Validation avant écriture","Un humain valide chaque écriture de l'agent avant qu'elle ne prenne effet.",["Interrompre le graphe avant l'outil d'écriture","Montrer au valideur l'entrée, la sortie et la justification"],"Configuration des interruptions et traces de validation","write",2,"LG","P","FINMA 08/2024;OWASP ASI09;IMDA MGF"],
+["HUM-02","Double autorisation","Les actions à fort impact exigent deux validations indépendantes.",["Appliquer le principe des quatre yeux","Tracer les deux valideurs"],"Traces de double validation","extact",3,"LG","P","FSB Sound Practices;ISO 27002 5.3"],
+["HUM-03","Valideur en mesure de juger","Le valideur dispose des éléments et du temps nécessaires pour contredire l'agent.",["Afficher les sources, le niveau de confiance et les alertes","Ne pas présélectionner l'acceptation"],"Maquette de l'écran de validation","",2,"PR","P","FINMA 08/2024;OWASP ASI09"],
+["HUM-04","Détection de la validation machinale","Les validations trop rapides ou systématiques sont mesurées et suivies.",["Mesurer le temps de validation et le taux d'acceptation","Glisser des cas témoins volontairement faux"],"Indicateur et seuil d'alerte","",2,"DV","D","FSB Sound Practices;OWASP ASI09;FINMA 08/2024"],
+["HUM-05","Arrêt d'urgence","Une personne habilitée peut arrêter l'agent immédiatement, et cet arrêt est testé.",["Prévoir une commande d'arrêt hors du contrôle de l'agent","Tester l'arrêt chaque semestre"],"Procès-verbal du dernier test","",1,"PR","C","Circ. 2023/1;OWASP ASI10;ISO 27002 5.29"],
+["HUM-06","Escalade définie","L'agent sait quand rendre la main, et à qui.",["Définir les cas d'escalade : doute, hors périmètre, refus","Nommer le destinataire de chaque escalade"],"Règles d'escalade et tests","agent|client",1,"LG","P","IMDA MGF"],
+["HUM-07","Autonomie justifiée","Toute action menée sans validation humaine est justifiée, bornée et approuvée par le propriétaire.",["Lister les actions autonomes","Fixer pour chacune un plafond et un contrôle a posteriori"],"Liste approuvée","nohum",1,"PR","P","FINMA 08/2024;IMDA MGF"],
+
+["DAT-01","Classification des données traitées","Les données que l'agent lit, produit et conserve sont classées.",["Classer entrées, sorties, traces et mémoire","Donner aux traces la classe de la donnée source"],"Rubrique données de la fiche d'agent","",1,"PR","P","Circ. 2023/1;ISO 27002 5.12;ISO 42001 A.7"],
+["DAT-02","Minimisation","L'agent ne reçoit que les données nécessaires à sa tâche.",["Filtrer les champs avant de les passer au modèle","Écarter les identifiants inutiles"],"Liste des champs transmis au modèle","pii",1,"DV","P","LPD art. 6;ISO 27002 5.34"],
+["DAT-03","Pas de données client chez un tiers sans cadre","Aucune donnée d'identification client ne part chez un tiers sans base contractuelle et mesures de protection.",["Préférer un modèle local","À défaut, pseudonymiser et garder les clés à la banque"],"Analyse juridique et tests de fuite","cid+ext|cid+netout",1,"DV","P","Art. 47 LB;ASB 2025;LPD art. 9;Circ. 2018/3"],
+["DAT-04","Masquage des données personnelles","Les données personnelles inutiles à la tâche sont masquées avant le modèle et dans les journaux.",["Activer le masquage en entrée et en sortie","Vérifier le masquage sur un jeu de test"],"Configuration et résultats de test","pii",2,"LG","P","LPD art. 7;ISO 27002 8.11"],
+["DAT-05","Communication à l'étranger","Tout transfert de données personnelles hors de Suisse repose sur une base valable.",["Identifier le pays d'hébergement de chaque fournisseur","Vérifier l'adéquation ou les clauses types"],"Registre des transferts","pii+ext|pii+netout",1,"PR","P","LPD art. 16-17;Circ. 2023/1"],
+["DAT-06","Conservation et effacement","Les données, les traces et la mémoire de l'agent ont une durée de conservation et sont effacées à terme.",["Fixer une durée par type de donnée","Automatiser l'effacement"],"Règles de conservation et preuve d'effacement","",1,"PR","P","LPD art. 6;ISO 27002 8.10"],
+["DAT-07","Requêtes sortantes sans données sensibles","Les requêtes émises par l'agent ne contiennent que le strict nécessaire.",["Contrôler le contenu des requêtes avant envoi","Placer un jeton canari dans les données et vérifier qu'il ne sort pas"],"Résultat du test du jeton canari","netout",1,"DV","P","Art. 47 LB;OWASP ASI02;ISO 27002 8.12"],
+["DAT-08","Données de test","Les tests n'utilisent pas de données client réelles sans protection équivalente à la production.",["Utiliser des données synthétiques ou anonymisées","Sinon, appliquer les contrôles de production"],"Description du jeu de test","",1,"PR","P","Circ. 2023/1;ISO 27002 8.33"],
+["DAT-09","Chiffrement","Les données de l'agent sont chiffrées en transit et au repos, traces et mémoire comprises.",["Chiffrer les échanges entre composants","Chiffrer le stockage des traces et de la mémoire"],"Configuration de chiffrement","pii",1,"IN","P","LPD art. 8;ISO 27002 8.24"],
+
+["CNT-01","Instructions et données séparées","Les contenus lus par l'agent sont traités comme des données, jamais comme des instructions.",["Délimiter les contenus externes dans le prompt","Ne jamais placer un contenu non fiable dans le prompt système"],"Gabarits de prompt","untr",1,"DV","P","OWASP ASI01"],
+["CNT-02","Filtre d'entrée","Les entrées non fiables passent par un filtre qui détecte les tentatives d'injection.",["Activer un rail d'entrée","Mesurer son taux de détection sur une suite de test"],"Configuration et taux mesuré","untr",1,"NG","P","OWASP ASI01;ISO 27002 8.7"],
+["CNT-03","Filtre du contenu récupéré","Les pages et les documents récupérés sont nettoyés avant d'atteindre le modèle.",["Retirer le texte caché, les scripts et les métadonnées","Signaler les instructions détectées"],"Tests sur pages et documents piégés","web|rag",1,"NG","P","OWASP ASI01;OWASP ASI06"],
+["CNT-04","Filtre de sortie","Les sorties sont contrôlées avant d'être montrées ou utilisées.",["Détecter données sensibles, contenus interdits et engagements non autorisés","Bloquer ou faire relire"],"Configuration et tests","client|extact|pii",1,"NG","P","ISO 27002 8.12;NIST AI RMF Manage"],
+["CNT-05","Sortie traitée comme non fiable","Les systèmes en aval valident la sortie de l'agent comme ils valideraient une saisie d'utilisateur.",["Échapper et valider avant toute requête, commande ou affichage","Interdire l'exécution directe d'une sortie"],"Revue de code","tools",1,"DV","P","OWASP LLM Top 10;ISO 27002 8.28"],
+["CNT-06","Affirmations sourcées","Chaque affirmation factuelle renvoie à une source vérifiable.",["Exiger un extrait cité pour chaque affirmation","Vérifier automatiquement que l'extrait figure dans la source"],"Taux d'affirmations sans appui","rag|web",2,"DV","D","FINMA 08/2024;NIST AI RMF Measure"],
+["CNT-07","Sources approuvées","Seules des sources approuvées comptent comme preuve.",["Tenir la liste des sources","Nommer qui la met à jour, et à quel rythme"],"Liste datée des sources","web",2,"PR","P","OWASP ASI06"],
+["CNT-08","Périmètre de sujets","L'agent refuse les demandes hors de son périmètre.",["Définir les sujets autorisés","Tester les refus"],"Tests de refus","client|agent",1,"NG","P","OWASP ASI01;ISO 42001 A.9"],
+["CNT-09","Prompt système sans secret","Le prompt système ne contient aucun secret, et aucun contrôle ne repose sur lui seul.",["Sortir clés et données sensibles du prompt","Doubler chaque règle du prompt par un contrôle en code"],"Revue du prompt","",1,"DV","P","OWASP LLM Top 10"],
+
+["CNF-01","Réseau fermé par défaut","L'agent n'a aucune sortie réseau, sauf celles explicitement autorisées.",["Écrire la politique en refus par défaut","Vérifier par un test de sortie"],"Politique réseau et résultat du test","",1,"OS","P","OWASP ASI02;ISO 27002 8.20;ISO 27002 8.22"],
+["CNF-02","Liste d'hôtes autorisés","Les sorties réseau sont limitées à une liste d'hôtes, de ports et de méthodes.",["Autoriser par hôte et par méthode, en lecture seule si possible","Revoir la liste chaque trimestre"],"Politique réseau et dernière revue","netout",1,"OS","P","OWASP ASI02;ISO 27002 8.23"],
+["CNF-03","Réseau ouvert justifié","Tout accès réseau non restreint est justifié, approuvé et compensé.",["Documenter pourquoi une liste d'hôtes est impossible","Ajouter un proxy et journaliser toutes les requêtes"],"Dérogation approuvée","netopen",1,"PR","P","ISO 27002 8.20;Circ. 2023/1"],
+["CNF-04","Fichiers fermés par défaut","L'agent ne lit et n'écrit que dans des emplacements déclarés.",["Mettre en lecture seule tout ce qui est hors du dossier de travail","Interdire l'accès aux fichiers du système hôte"],"Politique fichiers","tools",1,"OS","P","OWASP ASI05;ISO 27002 8.3"],
+["CNF-05","Processus sans privilège","L'agent tourne sans droits d'administration, avec des appels système restreints.",["Utiliser un utilisateur non privilégié","Restreindre les appels système"],"Configuration du bac à sable","tools",1,"OS","P","OWASP ASI05;ISO 27002 8.2"],
+["CNF-06","Environnements séparés","Développement, test et production sont séparés, données et identifiants compris.",["Utiliser des identifiants distincts par environnement","Interdire les données de production en développement"],"Schéma des environnements","",1,"IN","P","Circ. 2023/1;ISO 27002 8.31"],
+["CNF-07","Rôles cloisonnés","Le composant qui lit des contenus non fiables n'a pas accès aux données sensibles.",["Séparer lecteur et rédacteur","Ne faire passer entre eux que des données structurées"],"Schéma et test du jeton canari","untr+pii+netout|untr+pii+extact",1,"LG","P","OWASP ASI01;Meta Rule of Two"],
+["CNF-08","Canaux par défaut maîtrisés","Les canaux ouverts par défaut par le bac à sable sont fermés ou filtrés.",["Inventorier les canaux autorisés d'origine : dépôts de paquets, git, messageries","Fermer ceux dont l'agent n'a pas besoin"],"Politique revue ligne à ligne","netout",2,"OS","P","OWASP ASI02"],
+
+["SUP-01","Provenance du modèle","L'origine, la licence et l'intégrité de chaque modèle sont vérifiées.",["Télécharger depuis une source officielle","Vérifier l'empreinte au démarrage"],"Fiche du modèle et empreinte","",1,"PR","P","OWASP ASI04;ISO 27002 5.21"],
+["SUP-02","Versions figées","Le modèle, les prompts et les dépendances sont figés à une version précise.",["Épingler versions et empreintes","Interdire les mises à jour automatiques"],"Fichier de verrouillage","",1,"DV","P","OWASP ASI04;ISO 27002 8.9"],
+["SUP-03","Nomenclature des composants","Une liste tient à jour les modèles, bibliothèques, outils et serveurs utilisés par l'agent.",["Générer la nomenclature à chaque construction","La rapprocher des avis de sécurité"],"Nomenclature à jour","tools",2,"DV","D","OWASP ASI04;ISO 27002 8.8"],
+["SUP-04","Outils tiers approuvés","Chaque outil ou serveur tiers, MCP compris, est évalué et approuvé avant usage.",["Lire le code ou exiger une attestation","Figer la version et surveiller tout changement de description d'outil"],"Registre des outils approuvés","tp",1,"PR","P","OWASP ASI04;ISO 27002 5.19"],
+["SUP-05","Qualification d'externalisation","Chaque service externe utilisé par l'agent est qualifié au regard des règles d'externalisation.",["Évaluer si la fonction confiée est significative","Inscrire le prestataire et ses sous-traitants à l'inventaire"],"Note de qualification","ext|netout|tp",1,"PR","P","Circ. 2018/3;LPD art. 9;ISO 27002 5.19"],
+["SUP-06","Clauses contractuelles","Le contrat avec le fournisseur couvre l'audit, la localisation, la sous-traitance, la non-réutilisation des données et la sortie.",["Obtenir les droits d'audit pour la banque, son auditeur et la FINMA","Interdire l'entraînement sur les données de la banque"],"Contrat et annexes","ext",1,"PR","P","Circ. 2018/3;LPD art. 9;ISO 27002 5.20;ISO 42001 A.10"],
+["SUP-07","Plan de sortie","La banque peut changer de modèle ou de fournisseur dans un délai défini.",["Isoler l'appel au modèle derrière une interface","Tester un modèle de remplacement"],"Plan et test de bascule","ext",2,"PR","C","Circ. 2018/3;FINMA 08/2024;ISO 27002 5.30"],
+["SUP-08","Vulnérabilités des composants","Les avis de sécurité visant les composants de l'agent sont suivis et traités dans un délai défini.",["S'abonner aux bulletins du bac à sable et des bibliothèques","Fixer un délai de correction selon la gravité"],"Registre des correctifs","",1,"PR","C","Circ. 2023/1;ISO 27002 8.8"],
+["SUP-09","Maturité des composants","L'usage de composants en version préliminaire est identifié et accepté.",["Marquer les composants en version alpha ou antérieure à 1.0","Limiter leur usage en production"],"Acceptation signée","",2,"PR","P","ISO 27002 5.21;FINMA 08/2024"],
+
+["MEM-01","Mémoire cloisonnée","La mémoire persistante est séparée par utilisateur, par client et par cas d'usage.",["Porter une clé de cloisonnement dans chaque lecture et écriture","Tester l'absence de fuite entre sessions"],"Tests de cloisonnement","mem",1,"DV","P","OWASP ASI06;ISO 27002 8.3"],
+["MEM-02","Écriture en mémoire contrôlée","Ce que l'agent retient est filtré, daté et attribué à une source.",["Refuser de mémoriser tel quel un contenu non fiable","Conserver la provenance de chaque entrée"],"Journal des écritures en mémoire","mem",1,"DV","P","OWASP ASI06"],
+["MEM-03","Purge et expiration","La mémoire peut être inspectée, corrigée et effacée.",["Donner une durée de vie à chaque entrée","Prévoir la purge après un incident"],"Procédure et test de purge","mem",1,"PR","C","OWASP ASI06;LPD art. 6"],
+["MEM-04","Droits sur la base documentaire","La recherche documentaire respecte les droits de l'utilisateur sur chaque document.",["Filtrer par droits au moment de la requête","Tester avec un utilisateur sans droits"],"Tests d'accès","rag",1,"DV","P","OWASP LLM Top 10;ISO 27002 8.3"],
+["MEM-05","Intégrité de la base documentaire","L'alimentation de la base documentaire est maîtrisée et tracée.",["Limiter qui peut y déposer un document","Analyser les documents à l'entrée"],"Journal d'alimentation","rag",1,"PR","P","OWASP ASI06;ISO 42001 A.7"],
+
+["MAG-01","Authentification entre agents","Les agents s'authentifient entre eux, et chaque message est attribué à son émetteur.",["Donner une identité vérifiable à chaque agent","Rejeter les messages non attribués"],"Configuration et tests d'usurpation","multi",1,"DV","P","OWASP ASI07"],
+["MAG-02","Messages structurés","Les agents échangent des données structurées, validées à la réception.",["Définir un schéma par type de message","Refuser le texte libre porteur d'instructions"],"Schémas des messages","multi",1,"LG","P","OWASP ASI07;OWASP ASI01"],
+["MAG-03","Pas d'escalade par délégation","Un agent ne peut pas obtenir par un autre des droits qu'il n'a pas.",["Propager le niveau de droits le plus bas de la chaîne","Tester la demande par agent interposé"],"Tests d'escalade","multi",1,"DV","P","OWASP ASI03"],
+["MAG-04","Cascades endiguées","La défaillance d'un agent ne se propage pas aux autres.",["Poser des disjoncteurs et des délais d'attente","Fixer un plafond global d'exécution"],"Tests de panne","multi",2,"LG","C","OWASP ASI08"],
+["MAG-05","Agents inventoriés seulement","Seuls les agents inventoriés peuvent rejoindre le système.",["Tenir un registre des agents autorisés","Rejeter tout agent inconnu"],"Registre et test de rejet","multi",1,"PR","P","OWASP ASI10;FSB Sound Practices"],
+
+["LOG-01","Trace complète","Chaque exécution conserve les entrées, les appels au modèle et aux outils, les sorties et les décisions humaines.",["Instrumenter avec OpenTelemetry","Inclure les versions du modèle et du prompt"],"Exemple de trace complète","",1,"DV","D","FINMA 08/2024;FSB Sound Practices;ISO 27002 8.15"],
+["LOG-02","Décision rejouable","Une décision passée peut être reconstituée et expliquée.",["Conserver l'état à chaque étape","Tester une reconstitution par an"],"Démonstration de reconstitution","",2,"LG","D","FINMA 08/2024;ISO 42001 A.6"],
+["LOG-03","Traces protégées","Les traces sont protégées comme les données qu'elles contiennent, et ne peuvent être modifiées.",["Stocker en écriture seule","Restreindre l'accès et masquer"],"Droits et configuration du stockage","",1,"IN","P","LPD art. 8;ISO 27002 5.33;ISO 27002 8.15"],
+["LOG-04","Journal des requêtes sortantes","Chaque requête sortante est journalisée avec sa destination et son résultat, refus compris.",["Journaliser au niveau du bac à sable, pas de l'agent","Revoir les refus"],"Extrait du journal","netout",1,"OS","D","ISO 27002 8.16;OWASP ASI02"],
+["LOG-05","Preuves archivées","Les contenus externes sur lesquels s'appuie une décision sont archivés.",["Garder une copie datée de chaque page citée","En conserver l'empreinte"],"Archive et empreintes","web",2,"DV","D","ISO 27002 5.28;FINMA 08/2024"],
+["LOG-06","Journal des blocages","Les blocages des filtres et des politiques sont journalisés et revus.",["Journaliser chaque blocage avec sa cause","Revoir les blocages chaque mois"],"Journal et compte rendu de revue","",1,"DV","D","ISO 27002 8.16"],
+
+["TST-01","Seuils fixés d'avance","Les critères d'acceptation sont écrits avant le lancement des tests.",["Fixer un seuil par mesure","Les faire approuver par le propriétaire"],"Plan de test daté, antérieur aux résultats","",1,"PR","P","FINMA 08/2024;NIST AI RMF Measure"],
+["TST-02","Jeu de référence","La qualité est mesurée sur un jeu de cas représentatifs, cas limites compris.",["Constituer le jeu avec le métier","Mesurer par catégorie, pas seulement en moyenne"],"Résultats par catégorie","",1,"DV","D","FINMA 08/2024;NIST AI RMF Measure"],
+["TST-03","Stabilité","La même entrée donne des résultats cohérents d'une exécution à l'autre.",["Rejouer chaque cas plusieurs fois","Mesurer l'écart"],"Taux de stabilité","",2,"DV","D","FINMA 08/2024"],
+["TST-04","Tests d'injection","La résistance aux instructions cachées est mesurée sur une suite dédiée.",["Injecter dans chaque source d'entrée","Utiliser une suite de type AgentDojo"],"Taux d'instructions suivies","untr",1,"DV","D","OWASP ASI01;FINMA 08/2024;MITRE ATLAS"],
+["TST-05","Tests d'exfiltration","On vérifie qu'aucune donnée sensible ne peut sortir par les canaux de l'agent.",["Placer des jetons canaris dans les données","Chercher les jetons dans toutes les sorties"],"Résultat des tests canaris","pii",2,"DV","D","OWASP ASI02;ISO 27002 8.12"],
+["TST-06","Tests de mésusage des outils","L'agent est poussé à utiliser ses outils hors de leur périmètre.",["Tenter des paramètres hors bornes","Tenter des enchaînements d'outils non prévus"],"Résultats des tentatives","tools",2,"DV","D","OWASP ASI02"],
+["TST-07","Sondes automatisées","Le modèle et la chaîne complète sont soumis à des outils de sondage.",["Passer garak et PyRIT","Traiter chaque écart critique"],"Rapport des sondes","",2,"DV","D","MITRE ATLAS;NIST AI RMF Measure"],
+["TST-08","Biais","Les écarts de traitement entre groupes de personnes sont mesurés.",["Définir les groupes à comparer avec le métier","Fixer un écart tolérable"],"Mesures d'écart","dec",1,"DV","D","FINMA 08/2024;LPD art. 6"],
+["TST-09","Revue par la deuxième ligne","La deuxième ligne revoit le dossier de test avant la mise en service.",["Transmettre plan, résultats et écarts","Tracer l'avis rendu"],"Avis de la deuxième ligne","",2,"PR","D","FINMA 08/2024;Circ. 2023/1"],
+["TST-10","Revue indépendante","Avant la mise en service, une revue est menée par une équipe indépendante du développement.",["Mandater une équipe sans lien avec le projet","Couvrir conception, contrôles et tests"],"Rapport de revue indépendante","",3,"PR","D","FINMA 08/2024;ISO 27002 5.35"],
+["TST-11","Exercice d'attaque","Une équipe tente de détourner l'agent dans des conditions proches de la production.",["Fixer des objectifs : exfiltrer, faire agir, blanchir","Corriger puis retester"],"Rapport d'exercice et corrections","agent|web|client",3,"PR","D","FINMA 03/2024;FSB Sound Practices;ISO 27002 8.29"],
+["TST-12","Décision de mise en service","La mise en service fait l'objet d'une décision écrite du propriétaire.",["Joindre résultats, écarts et risques acceptés","Dater et signer"],"Décision signée","",1,"PR","P","FINMA 08/2024;ISO 27002 8.29"],
+
+["OPS-01","Indicateurs et seuils d'alerte","Chaque agent est suivi par quelques indicateurs, chacun avec un seuil d'alerte.",["Choisir quatre à six indicateurs","Nommer qui reçoit l'alerte"],"Tableau de bord","",1,"DV","D","FINMA 08/2024;NIST AI RMF Measure"],
+["OPS-02","Suivi de la dérive","La qualité et la répartition des résultats sont suivies dans le temps.",["Comparer chaque période à la référence","Enquêter sur tout écart inexpliqué"],"Courbes de suivi","",2,"DV","D","FINMA 08/2024"],
+["OPS-03","Sorties corrigées analysées","Les sorties ignorées ou corrigées par les utilisateurs sont analysées.",["Enregistrer chaque correction","En tirer des cas de test"],"Analyse périodique des corrections","",2,"DV","D","FINMA 08/2024"],
+["OPS-04","Gestion des changements","Tout changement de modèle, de prompt, d'outil ou de politique suit un processus de changement.",["Faire revoir chaque changement par un pair","Rejouer les tests avant déploiement"],"Historique des changements","",1,"PR","P","Circ. 2023/1;ISO 27002 8.32"],
+["OPS-05","Tests rejoués à chaque changement","La suite de tests est rejouée automatiquement à chaque changement.",["Brancher la suite sur la chaîne de déploiement","Bloquer le déploiement en cas d'échec"],"Résultats de la dernière exécution","",2,"DV","D","ISO 27002 8.29;FINMA 08/2024"],
+["OPS-06","Contrôles en configuration","Les contrôles sont exprimés en configuration versionnée, pas en consignes.",["Versionner politiques réseau, outils, filtres et plafonds","Déployer depuis le dépôt uniquement"],"Dépôt de politiques","",1,"DV","P","ISO 27002 8.9"],
+["OPS-07","Détection de comportement anormal","Les écarts par rapport au comportement habituel de l'agent déclenchent une alerte.",["Suivre volume d'appels, hôtes joints et outils utilisés","Alerter sur toute nouveauté"],"Règles d'alerte","agent",2,"DV","D","OWASP ASI10;ISO 27002 8.16"],
+["OPS-08","Revue périodique","Chaque agent est revu à échéance fixe : utilité, palier, droits et incidents.",["Tenir la revue au moins une fois par an","Retirer les agents sans usage"],"Compte rendu de revue","",1,"PR","D","FINMA 08/2024;ISO 42001 A.6"],
+["OPS-09","Retrait","Un agent retiré voit ses droits, ses secrets, sa mémoire et ses données supprimés.",["Suivre une liste de retrait","Mettre l'inventaire à jour"],"Liste de retrait complétée","",1,"PR","C","ISO 27002 8.10;ISO 42001 A.6"],
+
+["INC-01","Procédure d'incident","Une procédure couvre les incidents propres aux agents.",["Prévoir injection réussie, fuite et action non voulue","Dire qui coupe, qui analyse et qui informe"],"Procédure approuvée","",1,"PR","C","Circ. 2023/1;ISO 27002 5.24;ISO 27002 5.26"],
+["INC-02","Annonce aux autorités","Les délais d'annonce sont connus et tenus.",["Cyberincident : FINMA sous 24 h, puis rapport sous 72 h","Violation de la sécurité des données : PFPDT"],"Procédure et modèle d'annonce","",1,"PR","C","FINMA 03/2024;Circ. 2023/1;LPD art. 24"],
+["INC-03","Mode dégradé","L'activité peut continuer sans l'agent.",["Écrire la procédure manuelle de repli","Tester la bascule une fois par an"],"Procès-verbal de test","",2,"PR","C","FINMA 08/2024;Circ. 2023/1;ISO 27002 5.30"],
+["INC-04","Tolérance d'interruption","Pour une fonction critique, la durée d'indisponibilité tolérée de l'agent est fixée et approuvée.",["Rattacher l'agent à la fonction critique","Faire approuver la tolérance"],"Tolérance approuvée","crit",1,"PR","P","Circ. 2023/1"],
+["INC-05","Retour d'expérience","Chaque incident conduit à mettre à jour les menaces, les contrôles et les tests.",["Ajouter un cas de test par incident","Mettre le registre de menaces à jour"],"Compte rendu d'incident","",1,"PR","C","ISO 27002 5.27"],
+["INC-06","Remise en état","Après un incident, l'agent redémarre d'un état sain connu.",["Purger mémoire et contexte","Renouveler les secrets"],"Procédure de remise en état","tools",2,"PR","C","OWASP ASI06;ISO 27002 5.26"],
+
+["TRA-01","Annonce de la machine","La personne sait qu'elle échange avec une machine.",["L'annoncer dès le premier message","Le rappeler sur demande"],"Capture de l'annonce","client",1,"DV","P","PFPDT 2025;AI Act art. 50"],
+["TRA-02","Décision automatisée","La personne est informée d'une décision prise exclusivement par l'agent, et peut demander une revue humaine.",["Recenser les décisions à effet juridique ou notable","Offrir la revue humaine"],"Texte d'information et parcours de revue","dec",1,"PR","P","LPD art. 21"],
+["TRA-03","Recours à un humain","Un client peut joindre un humain à tout moment.",["Proposer la bascule vers un conseiller","La tester"],"Test de bascule","client",1,"PR","P","LPD art. 21;IMDA MGF"],
+["TRA-04","Utilisateurs internes informés","Les collaborateurs connaissent le périmètre, les limites et les erreurs connues de l'agent.",["Rédiger une notice d'une page","La tenir à jour après chaque incident"],"Notice d'utilisation","",1,"PR","P","FINMA 08/2024;ISO 42001 A.8"],
+["TRA-05","Exactitude sur les personnes","Les informations produites par l'agent sur une personne sont vérifiées avant usage.",["Recouper l'identité : date de naissance, pays","Écarter les homonymes"],"Règles de recoupement","pii+web|dec",2,"PR","D","LPD art. 6"],
+["TRA-06","Engagements encadrés","L'agent ne peut prendre aucun engagement au nom de la banque hors d'un cadre défini.",["Lister ce que l'agent peut promettre","Bloquer le reste en sortie"],"Liste et tests de blocage","client",1,"NG","P","ISO 42001 A.9"]
+];
+$("#h-n").textContent=C.length;$("#h-d").textContent=DOM.length;
+$("#f-layer").insertAdjacentHTML("beforeend",Object.entries(LAYER).map(([k,v])=>`<option value="${k}">${v}</option>`).join(""));
+
+/* ---------- calcul et rendu ---------- */
+let F={},T=1,RES=[],domF="";
+const LBL={o:"Obligatoire",r:"Recommandé",n:"Sans objet"};
+function compute(){
+  F=flags(P);const tr=tier(F);T=tr[0];
+  RES=C.map(c=>{const app=ok(c[5],F),s=!app?"n":T>=c[6]?"o":"r";
+    return {c,s,why:because(c[5],F,app)+(s==="o"?(c[6]>1?` Obligatoire à partir de T${c[6]}.`:" Fait partie du socle."):s==="r"?` Recommandé : devient obligatoire à T${c[6]}.`:"")}});
+  return tr;
+}
+function update(){
+  const tr=compute();
+  DIMS.forEach(([k,,,h])=>$("#h-"+k).textContent=h[P[k]]);
+  const n={o:0,r:0,n:0};RES.forEach(r=>n[r.s]++);
+  $("#v-tier").textContent="T"+T;
+  $("#v-title").textContent=["","Palier T1 : le socle","Palier T2 : contrôles renforcés","Palier T3 : contrôles maximaux"][T];
+  $("#v-why").textContent=T===1?"Lecture seule, sans données personnelles, sans sortie réseau : seul le socle s'applique.":"Motif : "+tr[1].join(", ")+".";
+  $("#v-counts").innerHTML=`<div><b>${n.o}</b><span>obligatoires</span></div><div><b>${n.r}</b><span>recommandés</span></div><div><b>${n.n}</b><span>sans objet</span></div>`;
+  $("#doms").innerHTML=DOM.map(d=>{const rs=RES.filter(r=>r.c[0].startsWith(d[0])),o=rs.filter(r=>r.s==="o").length,rc=rs.filter(r=>r.s==="r").length;
+    return `<button type="button" class="dom${o+rc?"":" zero"}" data-d="${d[0]}" aria-pressed="${domF===d[0]}"><span class="c">${d[0]}</span><span class="n">${d[1]}</span><span class="meter"><i class="o" style="width:${o/rs.length*100}%"></i><i class="r" style="width:${rc/rs.length*100}%"></i></span><span class="num">${o} obligatoires · ${rc} recommandés · ${rs.length} au total</span></button>`}).join("");
+  list();save();
+}
+function list(){
+  const st=$("input[name=f-st]:checked").value,ly=$("#f-layer").value,q=$("#f-q").value.trim().toLowerCase();
+  const keep=r=>(st==="all"||(st==="app"&&r.s!=="n")||st===r.s)&&(!ly||r.c[7]===ly)&&(!domF||r.c[0].startsWith(domF))&&(!q||(r.c[0]+" "+r.c[1]+" "+r.c[2]+" "+r.c[3].join(" ")+" "+r.c[9]).toLowerCase().includes(q));
+  const html=DOM.map(d=>{const all=RES.filter(r=>r.c[0].startsWith(d[0])),rs=all.filter(keep);if(!rs.length)return "";
+    return `<div class="grp"><header><span class="gc">${d[0]}</span><div><h3>${d[1]}</h3><p class="go">${d[2]}</p></div><span class="gn">${all.filter(r=>r.s!=="n").length} applicables sur ${all.length}</span></header>`+
+     rs.map(({c,s,why})=>`<details class="ctl${s==="n"?" na":""}"><summary><span class="id">${c[0]}</span><span class="t">${c[1]}</span><span class="pill ${s}">${LBL[s]}</span></summary><div class="body"><p class="st">${c[2]}</p>
+       <div><h4>Mise en œuvre</h4><ul class="how">${c[3].map(x=>`<li>${x}</li>`).join("")}</ul></div>
+       <div class="side"><div><h4>Preuve attendue</h4><p>${c[4]}</p></div><div><h4>Applicabilité</h4><p class="because">${why}</p></div>
+       <div><h4>Nature et outil</h4><div class="tags"><span>${TYPE[c[8]]}</span><span>${LAYER[c[7]]}</span></div></div>
+       <div><h4>Correspondances</h4><div class="tags">${c[9].split(";").map(x=>`<span>${x}</span>`).join("")}</div></div></div></div></details>`).join("")+`</div>`}).join("");
+  $("#list").innerHTML=html||`<p class="empty">Aucun contrôle ne correspond à ces filtres.</p>`;
+  $("#reset-dom").hidden=!domF;
+}
+$("#doms").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(!b)return;domF=domF===b.dataset.d?"":b.dataset.d;$$("#doms .dom").forEach(x=>x.setAttribute("aria-pressed",x.dataset.d===domF));list();$("#catalogue").scrollIntoView({behavior:"smooth"})});
+$("#reset-dom").addEventListener("click",()=>{domF="";$$("#doms .dom").forEach(x=>x.setAttribute("aria-pressed","false"));list()});
+$$("input[name=f-st]").forEach(i=>i.addEventListener("change",list));
+$("#f-layer").addEventListener("change",list);$("#f-q").addEventListener("input",list);
+
+/* ---------- déclaration d'applicabilité ---------- */
+function rows(){
+  const prof=DIMS.map(([k,l,o])=>l+" : "+o[P[k]]).concat(TOGS.filter(([k])=>P[k]).map(([,l])=>l)).join(" | ");
+  const head=["Identifiant","Domaine","Contrôle","Énoncé","Statut","Justification","Mise en œuvre","Preuve attendue","Nature","Outil","Correspondances","État (fait, partiel, à faire)","Responsable","Commentaire"];
+  const meta=[["Cas d'usage",NAME||"(sans nom)"],["Palier","T"+T],["Profil",prof],["Référentiel","version 0.1 du 12.10.2026"],[]];
+  const body=RES.map(({c,s,why})=>[c[0],DOM.find(d=>c[0].startsWith(d[0]))[1],c[1],c[2],LBL[s],why,c[3].join(" / "),c[4],TYPE[c[8]],LAYER[c[7]],c[9].split(";").join(", "),"","",""]);
+  return meta.concat([head],body);
+}
+const clean=x=>String(x).replace(/[\t\r\n]+/g," ");
+$("#copy").addEventListener("click",()=>{
+  const tsv=rows().map(r=>r.map(clean).join("\t")).join("\n"),t=$("#toast");
+  const fb=()=>{const a=$("#fallback");a.hidden=false;a.value=tsv;a.focus();a.select();t.textContent="Copie automatique refusée : le texte est sélectionné ci-dessous, copie-le puis colle-le dans Excel."};
+  try{navigator.clipboard.writeText(tsv).then(()=>{t.textContent="Copié. Colle dans Excel : une ligne par contrôle, "+RES.length+" lignes."},fb)}catch(e){fb()}
+});
+if(location.protocol==="file:"||/github\.io$|^localhost$|^192\.168\./.test(location.hostname)){
+  const b=$("#dl");b.hidden=false;
+  b.addEventListener("click",()=>{
+    const csv="﻿"+rows().map(r=>r.map(x=>'"'+clean(x).replace(/"/g,'""')+'"').join(";")).join("\r\n");
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+    a.download="declaration-applicabilite"+(NAME?"-"+NAME.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""):"")+".csv";a.click();
+  });
+}
+
+/* ---------- mémoire locale du profil ---------- */
+function save(){try{localStorage.setItem("ref-profil",JSON.stringify({P,NAME}))}catch(e){}}
+let init=null;try{init=JSON.parse(localStorage.getItem("ref-profil"))}catch(e){}
+if(init&&init.P&&typeof init.P.auto==="number")setProfile(init.P,init.NAME||"");else setProfile(PRESETS[1][1],PRESETS[1][0]);
+</script>
+</body>
+</html>
