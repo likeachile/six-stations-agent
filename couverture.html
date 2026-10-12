@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Couverture réglementaire du référentiel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ref.css">
+</head>
+<body class="p-cov">
+<div class="bar"><div class="wrap">
+  <nav class="nav" aria-label="Pages">
+    <a href="index.html#framework"><i style="--d:var(--fw-t)"></i>Framework</a>
+    <a href="index.html#cas-a"><i style="--d:var(--ca-t)"></i>Ligne A</a>
+    <a href="index.html#cas-b"><i style="--d:var(--cb-t)"></i>Ligne B</a>
+    <a href="referentiel.html"><i style="--d:var(--yl)"></i>Référentiel</a>
+    <a href="couverture.html" aria-current="page"><i style="--d:var(--vi-t)"></i>Couverture</a>
+  </nav>
+  <a class="portail" href="http://192.168.1.38">⊞ Portail</a>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="k">Couverture réglementaire · référentiel version <span id="h-v"></span></p>
+  <h1>D'où vient chaque contrôle, et ce qui manque.</h1>
+  <p class="sub">Texte par texte : ce qu'il demande, les contrôles du référentiel qui y répondent, et ce que le référentiel ne couvre pas, avec la raison.</p>
+  <div class="hfacts">
+    <div><b id="n-all"></b><span>exigences passées en revue</span></div>
+    <div><b id="n-c"></b><span>couvertes</span></div>
+    <div><b id="n-p"></b><span>couvertes en partie</span></div>
+    <div><b id="n-g"></b><span>non couvertes</span></div>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <div class="sh"><h2>Les trous, d'abord</h2><p class="lead">Ce que le référentiel ne couvre pas, ou seulement en partie. Pour presque tous, c'est un choix : le sujet relève d'un autre dispositif de la banque, ou d'un autre acteur.</p></div>
+  <div class="gaps" id="gaps"></div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <div class="sh"><h2>Texte par texte</h2><p class="lead">Un clic sur un identifiant ouvre le contrôle dans le référentiel.</p></div>
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Filtre">
+      <label><input type="radio" name="f" id="f-all" value="all" checked><span>Tout</span></label>
+      <label><input type="radio" name="f" id="f-gap" value="gap"><span>Seulement ce qui n'est pas pleinement couvert</span></label>
+    </div>
+  </div>
+  <div id="srcs"></div>
+</div></section>
+
+<footer><div class="wrap">Les résumés sont rédigés par nos soins et ne remplacent pas les textes. Les correspondances sont indicatives : elles disent qu'un contrôle contribue à une exigence, pas qu'il suffit à la remplir. À valider avec le juridique et la compliance de chaque établissement.</div></footer>
+
+<script src="data.js"></script>
+<script src="c1.js"></script>
+<script src="c2.js"></script>
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+$("#h-v").textContent=VERSION;
+const chips=cs=>cs.length?`<div class="tags">${cs.map(c=>`<a href="referentiel.html#${c[0]}" title="${esc(c[K.t])}">${c[0]}</a>`).join("")}</div>`:"";
+const LBL={c:"Couvert",p:"En partie",g:"Non couvert"};
+/* une ligne par exigence, plus les dix menaces OWASP propres aux agents */
+const ROWS=REFS.map(r=>{const cs=C.filter(c=>mapsOf(c).includes(r[0]));return {src:r[1],label:r[2],d:r[3],cs,st:r[4]||"c",why:r[5]||""}})
+ .concat(THREATS.filter(t=>t[0].startsWith("ASI")).map(t=>({src:"OWA",label:t[0]+", "+t[1].toLowerCase(),d:t[2],cs:C.filter(c=>thOf(c).includes(t[0])),st:"c",why:""})));
+const SOURCES=SRC.slice(0,10).concat([["OWA","OWASP agents","OWASP Top 10 for Agentic Applications","Agents","Sert de liste de menaces au référentiel : chaque contrôle indique celles qu'il traite."]],SRC.slice(10));
+const n=s=>ROWS.filter(r=>r.st===s).length;
+$("#n-all").textContent=ROWS.length;$("#n-c").textContent=n("c");$("#n-p").textContent=n("p");$("#n-g").textContent=n("g");
+
+const srcName=id=>SOURCES.find(s=>s[0]===id)[1];
+$("#gaps").innerHTML=["g","p"].map(s=>ROWS.filter(r=>r.st===s).map(r=>`<div class="gap"><span><span class="pill ${s}">${LBL[s]}</span></span><div><p class="k" style="color:var(--muted)">${srcName(r.src)}</p><h3>${r.label}</h3><p class="w">${r.why}</p>${chips(r.cs)}</div></div>`).join("")).join("");
+
+function render(){
+  const only=$("#f-gap").checked;let group="";
+  $("#srcs").innerHTML=SOURCES.map(s=>{
+    const all=ROWS.filter(r=>r.src===s[0]),rs=all.filter(r=>!only||r.st!=="c");if(!rs.length)return "";
+    const c=all.filter(r=>r.st==="c").length,p=all.filter(r=>r.st==="p").length,g=all.filter(r=>r.st==="g").length;
+    const gh=s[3]!==group?`<h2 class="grouph">${group=s[3]}</h2>`:"";
+    return gh+`<div class="srcb"><header><div><h3>${s[2]}</h3>${s[4]?`<p class="sn">${s[4]}</p>`:""}</div><div><span class="meter"><i class="c" style="width:${c/all.length*100}%"></i><i class="p" style="width:${p/all.length*100}%"></i><i class="g" style="width:${g/all.length*100}%"></i></span><p class="cnt">${c} couvertes · ${p} en partie · ${g} non couvertes</p></div></header>`+
+     rs.map(r=>`<div class="row"><span class="rl">${r.label}</span><div><p class="rd">${r.d}</p>${r.why?`<p class="rw">${r.why}</p>`:""}</div><div>${chips(r.cs)}</div><span><span class="pill ${r.st}">${LBL[r.st]}</span></span></div>`).join("")+`</div>`}).join("");
+}
+document.querySelectorAll("input[name=f]").forEach(i=>i.addEventListener("change",render));
+render();
+</script>
+</body>
+</html>
